@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scriptwriting Tool</title>
+    <style>
+        body {
+            font-family: "Courier New", monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+        }
+        .editor {
+            width: 70%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 12pt;
+            border-right: 1px solid #ddd;
+            line-height: 1.5em;
+            padding-right: 30px;
+            word-wrap: break-word;
+        }
+        .guideline {
+            width: 30%;
+            padding: 20px;
+            background-color: #e9e9e9;
+            border-left: 1px solid #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .scene-heading {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 1.5em;
+        }
+        .character-name {
+            text-align: center;
+            text-transform: uppercase;
+            margin-top: 1.5em;
+        }
+        .dialogue {
+            margin-left: 1.5em;
+        }
+        .transition {
+            text-align: right;
+            margin-top: 1.5em;
+        }
+        .action-line {
+            margin-left: 0;
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Editor -->
+    <div class="editor" contenteditable="true" id="editor"></div>
+
+    <!-- Guideline Panel -->
+    <div class="guideline" id="guideline">
+        <h3>Scriptwriting Guidelines</h3>
+        <p id="guideline-text">Start typing your script. The guidelines will appear here to help you format properly.</p>
+    </div>
+</div>
+
+<script>
+    const editor = document.getElementById('editor');
+    const guideline = document.getElementById('guideline-text');
+    
+    // Scene Headings and other sections
+    const sceneHeadingRegex = /^(INT\.|EXT\.).*$/gm;
+    const characterNameRegex = /^[A-Z ]+$/gm;  // Uppercase character names
+    const transitionRegex = /^(CUT TO:|FADE IN:|FADE OUT:)$/gm;
+
+    // Update guideline based on the current input type
+    function updateGuideline(text) {
+        if (sceneHeadingRegex.test(text)) {
+            guideline.innerHTML = 'Scene Heading: Write this in uppercase and bold (e.g., INT. OFFICE - DAY).';
+        } else if (characterNameRegex.test(text)) {
+            guideline.innerHTML = 'Character Name: Centered and in uppercase. For example: "JOHN".';
+        } else if (transitionRegex.test(text)) {
+            guideline.innerHTML = 'Transition: These should be right-aligned (e.g., "CUT TO:", "FADE OUT:").';
+        } else {
+            guideline.innerHTML = 'Start typing to see formatting guidelines for different sections of the script.';
+        }
+    }
+
+    // Script formatting based on the user input
+    editor.addEventListener('input', function() {
+        formatScript();
+    });
+
+    function formatScript() {
+        let content = editor.innerHTML;
+
+        // Scene Heading formatting
+        content = content.replace(sceneHeadingRegex, '<span class="scene-heading">$&</span>');
+
+        // Character Names formatting
+        content = content.replace(characterNameRegex, '<div class="character-name">$&</div>');
+
+        // Dialogue formatting
+        content = content.replace(/^([A-Za-z0-9 ]+)$/gm, function(match) {
+            if (match.match(characterNameRegex)) return ''; // Skip if it’s already a character name
+            return '<div class="dialogue">$&</div>';
+        });
+
+        // Action Line formatting (without indentation)
+        content = content.replace(/^([A-Za-z0-9\s,.!?()-]+)$/gm, '<div class="action-line">$&</div>');
+
+        // Transitions formatting
+        content = content.replace(transitionRegex, '<div class="transition">$&</div>');
+
+        editor.innerHTML = content;
+        updateGuideline(content);
+
+        // Ensure that the cursor stays in the correct position and the text auto-scrolls
+        setTimeout(() => {
+            editor.scrollTop = editor.scrollHeight;
+        }, 0);
+    }
+</script>
+
+</body>
+</html>
+
+
